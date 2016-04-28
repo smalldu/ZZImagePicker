@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="8Tj-Bu-PlJ">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tAV-l8-oIz">
+            <objects>
+                <viewController id="VfT-ii-LPy" customClass="ViewController" customModule="ZZImagePicker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="es4-f0-gjC"/>
+                        <viewControllerLayoutGuide type="bottom" id="aPg-zw-Btt"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="ZQj-Vl-G5f">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4hg-D2-oWz">
+                                <rect key="frame" x="250" y="250" width="100" height="100"/>
+                                <color key="backgroundColor" red="1" green="0.14781642049999999" blue="0.28030054059999998" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="TRr-NT-JP3"/>
+                                    <constraint firstAttribute="height" constant="100" id="uIK-Cz-FUK"/>
+                                </constraints>
+                                <state key="normal" title="选择照片">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="goPhoto:" destination="VfT-ii-LPy" eventType="touchUpInside" id="S9f-Qb-JSO"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="4hg-D2-oWz" firstAttribute="centerX" secondItem="ZQj-Vl-G5f" secondAttribute="centerX" id="MjN-7l-chG"/>
+                            <constraint firstItem="4hg-D2-oWz" firstAttribute="centerY" secondItem="ZQj-Vl-G5f" secondAttribute="centerY" id="Rqa-yh-bxj"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="u9c-No-yGa"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="fxq-hx-pht" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="610" y="199"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="1O8-V3-f7l">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="8Tj-Bu-PlJ" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="64o-d0-xTV">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="VfT-ii-LPy" kind="relationship" relationship="rootViewController" id="nFC-ZO-PUK"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Uej-Rj-6a6" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-202" y="199"/>
+        </scene>
+    </scenes>
+</document>
