@@ -79,7 +79,9 @@ class ZZPhotoViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "照片库"
+        self.tableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         self.tableView.tableFooterView = UIView()
+        self.tableView.rowHeight = 55
         let leftBarItem = UIBarButtonItem(title: "取消", style: UIBarButtonItemStyle.Plain, target: self, action:#selector(ZZPhotoViewController.cancel) )
         self.navigationItem.rightBarButtonItem = leftBarItem
     }
@@ -108,19 +110,17 @@ class ZZPhotoViewController: UIViewController {
         
         if segue.identifier == "showAllPhotos"{
             
-            guard let assetGridViewController = segue.destinationViewController as? ZZAssetGridViewController, cell = sender as? UITableViewCell else{
+            guard let assetGridViewController = segue.destinationViewController as? ZZAssetGridViewController, cell = sender as? ZZPhotoCell else{
                 return
             }
             assetGridViewController.completeHandler = completeHandler
-            assetGridViewController.title = cell.textLabel?.text
+            assetGridViewController.title = cell.titleLabel.text
             assetGridViewController.maxSelected = self.maxSelected
             guard  let indexPath = self.tableView.indexPathForCell(cell) else { return }
             let fetchResult = self.items[indexPath.row].fetchResult
             
             if let x = fetchResult.firstObject where x is PHAsset{
-                
                 assetGridViewController.assetsFetchResults = fetchResult
-                
             }else{
                 return
             }
@@ -166,9 +166,10 @@ extension ZZPhotoViewController:PHPhotoLibraryChangeObserver{
 extension ZZPhotoViewController:UITableViewDelegate,UITableViewDataSource{
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
+        let cell = tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath) as! ZZPhotoCell
         let item = self.items[indexPath.row]
-        cell.textLabel?.text = "\(item.title ?? "") (\(item.fetchResult.count))"
+        cell.titleLabel.text = "\(item.title ?? "") "
+        cell.countLabel.text = "（\(item.fetchResult.count)）"
         return cell
     }
     

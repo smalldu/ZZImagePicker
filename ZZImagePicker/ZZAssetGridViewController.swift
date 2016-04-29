@@ -9,79 +9,157 @@
 import UIKit
 import Photos
 
+let zz_sw:CGFloat = UIScreen.mainScreen().bounds.width
+let zz_sh:CGFloat = UIScreen.mainScreen().bounds.height
+
 class ZZAssetGridViewController: UIViewController {
     
     @IBOutlet weak var collectionView:UICollectionView!
+    @IBOutlet weak var toolBar:UIToolbar!
+
+    @IBOutlet weak var preview: UIBarButtonItem!
+    @IBOutlet weak var sendItem: UIBarButtonItem!
     
+    /// 后去到的结果 存放的PHAsset
     var assetsFetchResults:PHFetchResult!
+    
+    /// 带缓存的图片管理对象
     var imageManager:PHCachingImageManager!
+    
+    /// 小图大小
     var assetGridThumbnailSize:CGSize!
+    
+    /// 预缓存Rect
     var previousPreheatRect:CGRect!
+    
+    /// 最多可以选择的个数
     var maxSelected:Int = 9
+    
+    /// 点击完成时的回调
     var completeHandler:((assets:[PHAsset])->())?
+    
+    lazy var selectedLayer:ZZImageSelectedLayer = {
+        let tmpLayer = ZZImageSelectedLayer(toolBar:self.toolBar)
+        return tmpLayer
+    }()
     
     override func awakeFromNib() {
         super.awakeFromNib()
         if assetsFetchResults == nil {
+            // 如果没有传入值 则获取所有资源
             let allPhotosOptions = PHFetchOptions()
             allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+            allPhotosOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.Image.rawValue)
             assetsFetchResults = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Image,options: allPhotosOptions)
         }
         
+        // 初始化和重置缓存
         self.imageManager = PHCachingImageManager()
         self.resetCachedAssets()
+        // 监听资源改变 （可以不要 如果不用删除和修改图片的话）
         PHPhotoLibrary.sharedPhotoLibrary().registerChangeObserver(self)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.collectionView.backgroundColor = UIColor.whiteColor()
+        
+        // 获取流布局对象并设置itemSize 设置允许多选
         let layout = (self.collectionView.collectionViewLayout as! UICollectionViewFlowLayout)
         layout.itemSize = CGSize(width: UIScreen.mainScreen().bounds.size.width/3-1,height: UIScreen.mainScreen().bounds.size.width/3-1)
         self.collectionView.allowsMultipleSelection = true
+        
+        let rightBarItem = UIBarButtonItem(title: "取消", style: UIBarButtonItemStyle.Plain, target: self, action: #selector(ZZAssetGridViewController.cancel))
+        self.navigationItem.rightBarButtonItem = rightBarItem
+        
+        self.preview.action = #selector(ZZAssetGridViewController.previewImage)
+        self.sendItem.action = #selector(ZZAssetGridViewController.finishSelect)
+        
+        self.disableItems()
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
+        
+        // 计算出小图大小 （ 为targetSize做准备 ）
         let scale = UIScreen.mainScreen().scale
         let cellSize = (self.collectionView.collectionViewLayout as! UICollectionViewFlowLayout).itemSize
         assetGridThumbnailSize = CGSizeMake( cellSize.width*scale , cellSize.height*scale)
     }
     
+    // 是否页面加载完毕 ， 加载完毕后再做缓存 否则数值可能有误
     var didLoad = false
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         didLoad = true
     }
     
+    private func enableItems(){
+        preview.enabled = true
+        sendItem.enabled = true
+    }
+    
+    private func disableItems(){
+        preview.enabled = false
+        sendItem.enabled = false
+    }
     deinit{
         PHPhotoLibrary.sharedPhotoLibrary().unregisterChangeObserver(self)
     }
     
+    /**
+    重置缓存
+     */
     func resetCachedAssets(){
         self.imageManager.stopCachingImagesForAllAssets()
         self.previousPreheatRect = CGRectZero
     }
     
-    @IBAction func complete(sender: AnyObject) {
+    /**
+     取消
+     */
+    func cancel() {
+        self.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    /**
+     获取已选择个数
+     
+     - returns: count
+     */
+    func selectedCount() -> Int {
+        return self.collectionView.indexPathsForSelectedItems()?.count ?? 0
+    }
+}
+
+extension ZZAssetGridViewController{
+
+
+    // TODO - 预览
+    func previewImage() {
+        // 预览
+    }
+
+    /**
+     点击完成，取出已选择的图片资源 调用闭包
+     */
+    func finishSelect(){
         var assets:[PHAsset] = []
         if let indexPaths = self.collectionView.indexPathsForSelectedItems(){
             for indexPath in indexPaths{
                 assets.append(assetsFetchResults[indexPath.row] as! PHAsset)
             }
         }
-        
-        self.navigationController?.dismissViewControllerAnimated(true, completion: { 
+
+        self.navigationController?.dismissViewControllerAnimated(true, completion: {
             self.completeHandler?(assets:assets)
         })
     }
- 
-    func selectedCount() -> Int {
-        return self.collectionView.indexPathsForSelectedItems()?.count ?? 0
-    }
+    
 }
 
-
+//MARK: - PHPhotoLibraryChangeObserver 图片删除或者修改开始后触发的代理 如果没有删除或者修改操作可以删掉这段和前面注册的代码
 extension ZZAssetGridViewController:PHPhotoLibraryChangeObserver{
     
     func photoLibraryDidChange(changeInstance: PHChange) {
@@ -114,6 +192,7 @@ extension ZZAssetGridViewController:PHPhotoLibraryChangeObserver{
     
 }
 
+//MARK: - UICollectionViewDataSource,UICollectionViewDelegate
 extension ZZAssetGridViewController:UICollectionViewDataSource,UICollectionViewDelegate{
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -133,25 +212,42 @@ extension ZZAssetGridViewController:UICollectionViewDataSource,UICollectionViewD
     
     func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
         if let cell = collectionView.cellForItemAtIndexPath(indexPath) as? ZZGridViewCell{
+            let sc = self.selectedCount()
+            selectedLayer.num = sc
+            if sc == 0{
+                self.disableItems()
+            }
             cell.showAnim()
         }
     }
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         if let cell = collectionView.cellForItemAtIndexPath(indexPath) as? ZZGridViewCell{
-//            print(self.selectedCount())
-            if self.selectedCount() > self.maxSelected {
+            let sc = self.selectedCount()
+            if sc > self.maxSelected {
+                // 如果选择的个数大于最大选择数 设置为不选中状态
                 collectionView.deselectItemAtIndexPath(indexPath, animated: false)
+                selectedLayer.tooMoreAnimate()
             }else{
+                selectedLayer.num = sc
+                if sc > 0 && !self.sendItem.enabled{
+                    self.enableItems()
+                }
                 cell.showAnim()
             }
         }
     }
     
+    /**
+     在滚动中不断更新缓存
+     */
     func scrollViewDidScroll(scrollView: UIScrollView) {
         self.updateCachedAssets()
     }
     
+    /**
+     更新缓存资源
+     */
     func updateCachedAssets()  {
         
         let isViewVisible = self.isViewLoaded() && didLoad

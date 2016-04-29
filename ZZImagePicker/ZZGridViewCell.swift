@@ -38,6 +38,8 @@ public class ZZGridViewCell: UICollectionViewCell {
     
     public override func awakeFromNib() {
         super.awakeFromNib()
+        imageView.contentMode = .ScaleAspectFill
+        imageView.clipsToBounds = true
     }
 
 }
