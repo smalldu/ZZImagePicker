@@ -9,6 +9,18 @@
 import UIKit
 import Photos
 
+class ZZImageItem {
+    
+    var fetchResult:PHFetchResult
+    var title:String?
+    
+    init(title:String?,fetchResult:PHFetchResult){
+        self.title = title
+        self.fetchResult = fetchResult
+    }
+    
+}
+
 class ZZPhotoViewController: UIViewController {
     
     //所有PhotoKit的对象都继承自PHObject 基础类，公用接口只提供一个localIdentifier属性
@@ -18,27 +30,44 @@ class ZZPhotoViewController: UIViewController {
     //fetchXXX  这些方法不是异步的 返回PHFetchResult对象
     @IBOutlet weak var tableView:UITableView!
     var completeHandler:((assets:[PHAsset])->())?
-    var sectionFetchResults:[PHFetchResult] = []
+    var items:[ZZImageItem] = []
     var sectionLocalizedTitles:[String] = []
     
     var maxSelected:Int = 9
     override func awakeFromNib() {
         super.awakeFromNib()
         
-        let allPhotosOptions = PHFetchOptions()
-        allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+//        let allPhotosOptions = PHFetchOptions()
+//        allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+//        let allPhotos = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Image,options: allPhotosOptions)
         
-        let allPhotos = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Image,options: allPhotosOptions)
-        
-        let smartAlbums = PHAssetCollection.fetchAssetCollectionsWithType(PHAssetCollectionType.SmartAlbum, subtype: PHAssetCollectionSubtype.AlbumRegular, options: nil)
-        
+        let smartOptions = PHFetchOptions()
+        let smartAlbums = PHAssetCollection.fetchAssetCollectionsWithType(PHAssetCollectionType.SmartAlbum, subtype: PHAssetCollectionSubtype.AlbumRegular, options: smartOptions)
+        self.convertCollection(smartAlbums)
+     
         let topLevelUserCollections = PHCollectionList.fetchTopLevelUserCollectionsWithOptions(nil)
+        self.convertCollection(topLevelUserCollections)
         
-        sectionFetchResults = [allPhotos,smartAlbums,topLevelUserCollections]
-        sectionLocalizedTitles = ["","智能相册","专辑"]
-        
+        self.items.sortInPlace { (item1, item2) -> Bool in
+            return item1.fetchResult.count > item2.fetchResult.count
+        }
         // 注册监听
         PHPhotoLibrary.sharedPhotoLibrary().registerChangeObserver(self)
+    }
+    
+    private func convertCollection(collection:PHFetchResult){
+        
+        for i in 0..<collection.count{
+            let resultsOptions = PHFetchOptions()
+            resultsOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+            resultsOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.Image.rawValue)
+            guard let c = collection[i] as? PHAssetCollection else { return }
+            let assetsFetchResult = PHAsset.fetchAssetsInAssetCollection(c , options: resultsOptions)
+            if assetsFetchResult.count > 0{
+                items.append(ZZImageItem(title: c.localizedTitle, fetchResult: assetsFetchResult))
+            }
+        }
+        
     }
     
     
@@ -50,7 +79,7 @@ class ZZPhotoViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "照片库"
-        
+        self.tableView.tableFooterView = UIView()
         let leftBarItem = UIBarButtonItem(title: "取消", style: UIBarButtonItemStyle.Plain, target: self, action:#selector(ZZPhotoViewController.cancel) )
         self.navigationItem.rightBarButtonItem = leftBarItem
     }
@@ -67,7 +96,7 @@ class ZZPhotoViewController: UIViewController {
             firstLoad = true
         }
         if let zzAssetGridVc = self.storyboard?.instantiateViewControllerWithIdentifier("zzAssetGridVC") as? ZZAssetGridViewController{
-            zzAssetGridVc.assetsFetchResults = sectionFetchResults.first
+            zzAssetGridVc.assetsFetchResults = self.items.first?.fetchResult
             zzAssetGridVc.completeHandler = completeHandler
             zzAssetGridVc.maxSelected = self.maxSelected
             self.navigationController?.pushViewController(zzAssetGridVc, animated: false)
@@ -86,17 +115,11 @@ class ZZPhotoViewController: UIViewController {
             assetGridViewController.title = cell.textLabel?.text
             assetGridViewController.maxSelected = self.maxSelected
             guard  let indexPath = self.tableView.indexPathForCell(cell) else { return }
-            let fetchResult = self.sectionFetchResults[indexPath.section]
+            let fetchResult = self.items[indexPath.row].fetchResult
             
             if let x = fetchResult.firstObject where x is PHAsset{
                 
                 assetGridViewController.assetsFetchResults = fetchResult
-                
-            }else if let x = fetchResult.firstObject where x is PHAssetCollection{
-                
-                let collection = fetchResult[indexPath.row] as! PHAssetCollection
-                let assetsFetchResult = PHAsset.fetchAssetsInAssetCollection(collection, options: nil)
-                assetGridViewController.assetsFetchResults = assetsFetchResult
                 
             }else{
                 return
@@ -117,20 +140,20 @@ extension ZZPhotoViewController:PHPhotoLibraryChangeObserver{
     func photoLibraryDidChange(changeInstance: PHChange) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
             
-            var updatedSectionFetchResults = self.sectionFetchResults
+            var updatedSectionFetchResults = self.items
             var reloadRequired = false
             
-            for i in 0..<self.sectionFetchResults.count{
-                if let changeDetails = changeInstance.changeDetailsForFetchResult(self.sectionFetchResults[i]){
+            for i in 0..<self.items.count{
+                if let changeDetails = changeInstance.changeDetailsForFetchResult(self.items[i].fetchResult){
                     // 有改变则替换
-                    updatedSectionFetchResults[i] = changeDetails.fetchResultAfterChanges
+                    updatedSectionFetchResults[i].fetchResult = changeDetails.fetchResultAfterChanges
                     reloadRequired = true
                 }
             }
             
             if reloadRequired {
                 dispatch_async(dispatch_get_main_queue(), {
-                    self.sectionFetchResults = updatedSectionFetchResults
+                    self.items = updatedSectionFetchResults
                     self.tableView.reloadData()
                 })
             }
@@ -142,38 +165,19 @@ extension ZZPhotoViewController:PHPhotoLibraryChangeObserver{
 //MARK: - UITableViewDelegate,UITableViewDataSource
 extension ZZPhotoViewController:UITableViewDelegate,UITableViewDataSource{
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return self.sectionFetchResults.count
-    }
-    
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
-        let fetchResult = self.sectionFetchResults[indexPath.section]
-        if indexPath.section == 0{
-            cell.textLabel?.text = "所有照片 (\(fetchResult.count))"
-        }else{
-            let collection:PHAssetCollection = fetchResult[indexPath.row] as! PHAssetCollection
-            let assetsFetchResult = PHAsset.fetchAssetsInAssetCollection(collection, options: nil)
-            cell.textLabel?.text = "\(collection.localizedTitle!) (\(assetsFetchResult.count))"
-        }
+        let item = self.items[indexPath.row]
+        cell.textLabel?.text = "\(item.title ?? "") (\(item.fetchResult.count))"
         return cell
     }
     
-    
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0{
-            return 1
-        }
-        return self.sectionFetchResults[section].count
+        return self.items.count
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        
-    }
-    
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return self.sectionLocalizedTitles[section]
     }
     
 }
