@@ -1,5 +1,3 @@
-# ZZImagePicker
-
 #####1、PhotoKit是什么？
 
 PhotoKit是苹果给我们提供的一个处理相册资源的库。以前使用[AssetsLibrary 框架](https://developer.apple.com/library/ios/documentation/AssetsLibrary/Reference/ALAssetsLibrary_Class/#//apple_ref/doc/uid/TP40009722-CH1-SW57) ， 相机应用和照片应用发生了显著的变化，增加了许多新特性，包括按时刻来组织照片的方式。但与此同时，AssetsLibrary 框架落伍了，iOS 8 开始苹果引入PhotoKit 。
@@ -32,3 +30,14 @@ self.zz_presentPhotoVC(4){ (assets) in
 - [上面gif的代码地址(swift)](https://github.com/smalldu/ZZImagePicker)
 
 
+######2016年4月29更新
+ 模仿微信，将照片库中只能相册为0的cell去掉，所有分组合成一个section，并排序 ，优化页面显示 ，修改选中模式，添加预览模式（暂时还没做）
+如图：
+
+![配图](http://upload-images.jianshu.io/upload_images/954071-38af19cb1b9bf431.gif?imageMogr2/auto-orient/strip)
+
+![手机截图](http://upload-images.jianshu.io/upload_images/954071-11fadba6f7d985db.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+如果大于最大可选择数量，会左右摇摆提示。
+后面完成预览功能会再来更新。
+有什么好的建议也可以提出来

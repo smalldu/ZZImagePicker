@@ -14,6 +14,7 @@ class ZZAssetPreviewVC: UIViewController {
     
     var assets:[PHAsset]
     var collectionView:UICollectionView!
+    
     /// 带缓存的图片管理对象
     var imageManager:PHCachingImageManager
     var assetGridThumbnailSize:CGSize!
@@ -33,7 +34,7 @@ class ZZAssetPreviewVC: UIViewController {
         self.view.backgroundColor = UIColor.blackColor()
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = 0
-        layout.minimumInteritemSpacing = 1
+        layout.minimumInteritemSpacing = 0
         layout.itemSize = self.view.bounds.size
         layout.scrollDirection = .Horizontal
         collectionView = UICollectionView(frame: self.view.bounds, collectionViewLayout: layout)

@@ -17,9 +17,13 @@
 		2057BA991CD0BFC1004170E8 /* ZZImage.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2057BA981CD0BFC1004170E8 /* ZZImage.storyboard */; };
 		2057BA9B1CD0C004004170E8 /* ZZPhotoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2057BA9A1CD0C004004170E8 /* ZZPhotoViewController.swift */; };
 		2057BA9E1CD0CB63004170E8 /* ZZImage.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2057BA9D1CD0CB63004170E8 /* ZZImage.xcassets */; };
+		2057BAE01CD3551D004170E8 /* ZZPhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2057BADF1CD3551D004170E8 /* ZZPhotoCell.swift */; };
 		2081B12B1CD07539001D7CB7 /* ZZAssetGridViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2081B12A1CD07539001D7CB7 /* ZZAssetGridViewController.swift */; };
 		2081B12D1CD0778D001D7CB7 /* ZZGridViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2081B12C1CD0778D001D7CB7 /* ZZGridViewCell.swift */; };
 		2081B12F1CD09429001D7CB7 /* UICollectionView+Add.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2081B12E1CD09429001D7CB7 /* UICollectionView+Add.swift */; };
+		20CC5E511CD35D57006C5000 /* ZZImageSelectedLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CC5E501CD35D57006C5000 /* ZZImageSelectedLayer.swift */; };
+		20CC5E531CD872D0006C5000 /* ZZAssetPreviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CC5E521CD872D0006C5000 /* ZZAssetPreviewVC.swift */; };
+		20CC5E551CD8758B006C5000 /* ZZPhotoPreviewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20CC5E541CD8758B006C5000 /* ZZPhotoPreviewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,9 +60,13 @@
 		2057BA981CD0BFC1004170E8 /* ZZImage.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = ZZImage.storyboard; sourceTree = "<group>"; };
 		2057BA9A1CD0C004004170E8 /* ZZPhotoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZZPhotoViewController.swift; sourceTree = "<group>"; };
 		2057BA9D1CD0CB63004170E8 /* ZZImage.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = ZZImage.xcassets; sourceTree = "<group>"; };
+		2057BADF1CD3551D004170E8 /* ZZPhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZZPhotoCell.swift; sourceTree = "<group>"; };
 		2081B12A1CD07539001D7CB7 /* ZZAssetGridViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZZAssetGridViewController.swift; sourceTree = "<group>"; };
 		2081B12C1CD0778D001D7CB7 /* ZZGridViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZZGridViewCell.swift; sourceTree = "<group>"; };
 		2081B12E1CD09429001D7CB7 /* UICollectionView+Add.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UICollectionView+Add.swift"; sourceTree = "<group>"; };
+		20CC5E501CD35D57006C5000 /* ZZImageSelectedLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZZImageSelectedLayer.swift; sourceTree = "<group>"; };
+		20CC5E521CD872D0006C5000 /* ZZAssetPreviewVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZZAssetPreviewVC.swift; sourceTree = "<group>"; };
+		20CC5E541CD8758B006C5000 /* ZZPhotoPreviewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZZPhotoPreviewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +155,10 @@
 				2057BA981CD0BFC1004170E8 /* ZZImage.storyboard */,
 				2057BA9A1CD0C004004170E8 /* ZZPhotoViewController.swift */,
 				2057BA9D1CD0CB63004170E8 /* ZZImage.xcassets */,
+				2057BADF1CD3551D004170E8 /* ZZPhotoCell.swift */,
+				20CC5E501CD35D57006C5000 /* ZZImageSelectedLayer.swift */,
+				20CC5E521CD872D0006C5000 /* ZZAssetPreviewVC.swift */,
+				20CC5E541CD8758B006C5000 /* ZZPhotoPreviewCell.swift */,
 			);
 			name = ZZImage;
 			sourceTree = "<group>";
@@ -286,10 +298,14 @@
 			files = (
 				2081B12D1CD0778D001D7CB7 /* ZZGridViewCell.swift in Sources */,
 				20118AF11CBCCDAF007E6EA6 /* ViewController.swift in Sources */,
+				20CC5E511CD35D57006C5000 /* ZZImageSelectedLayer.swift in Sources */,
 				2081B12F1CD09429001D7CB7 /* UICollectionView+Add.swift in Sources */,
 				2081B12B1CD07539001D7CB7 /* ZZAssetGridViewController.swift in Sources */,
+				20CC5E531CD872D0006C5000 /* ZZAssetPreviewVC.swift in Sources */,
+				20CC5E551CD8758B006C5000 /* ZZPhotoPreviewCell.swift in Sources */,
 				20118AEF1CBCCDAF007E6EA6 /* AppDelegate.swift in Sources */,
 				2057BA9B1CD0C004004170E8 /* ZZPhotoViewController.swift in Sources */,
+				2057BAE01CD3551D004170E8 /* ZZPhotoCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
