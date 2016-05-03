@@ -20,7 +20,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func goPhoto(sender: AnyObject) {
-        self.zz_presentPhotoVC(4){ (assets) in
+        self.zz_presentPhotoVC(6){ (assets) in
             print(assets.count)
         }   
     }

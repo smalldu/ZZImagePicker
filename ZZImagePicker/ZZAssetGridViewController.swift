@@ -38,8 +38,8 @@ class ZZAssetGridViewController: UIViewController {
     /// 点击完成时的回调
     var completeHandler:((assets:[PHAsset])->())?
     
-    lazy var selectedLayer:ZZImageSelectedLayer = {
-        let tmpLayer = ZZImageSelectedLayer(toolBar:self.toolBar)
+    lazy var selectedLayer:ZZImageSelectedLabel = {
+        let tmpLayer = ZZImageSelectedLabel(toolBar:self.toolBar)
         return tmpLayer
     }()
     
@@ -139,6 +139,15 @@ extension ZZAssetGridViewController{
     // TODO - 预览
     func previewImage() {
         // 预览
+        var assets:[PHAsset] = []
+        if let indexPaths = self.collectionView.indexPathsForSelectedItems(){
+            for indexPath in indexPaths{
+                assets.append(assetsFetchResults[indexPath.row] as! PHAsset)
+            }
+        }
+        
+        let vc = ZZAssetPreviewVC(assets:assets)
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 
     /**

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ZZImageSelectedLayer: UILabel {
+class ZZImageSelectedLabel: UILabel {
 
     var num:Int = 0{
         didSet{
@@ -32,6 +32,9 @@ class ZZImageSelectedLayer: UILabel {
         toolBar.addSubview(self)
     }
     
+    /**
+     改变数字的动画
+     */
     func animateSelf() {
         self.transform = CGAffineTransformMakeScale(0.1, 0.1)
         UIView.animateWithDuration(0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
@@ -39,6 +42,9 @@ class ZZImageSelectedLayer: UILabel {
             }, completion: nil)
     }
     
+    /**
+     超出最大选择输时动画
+     */
     func tooMoreAnimate(){
         
         UIView.animateKeyframesWithDuration(0.4, delay: 0, options: UIViewKeyframeAnimationOptions.CalculationModeLinear, animations: {
