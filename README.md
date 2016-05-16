@@ -1,3 +1,12 @@
+
+
+######2016年5月3日更新
+
+实现预览功能，基本可以使用了，有什么需求可以提提
+
+![配图](http://upload-images.jianshu.io/upload_images/954071-681a8b13e8d2fe1b.gif?imageMogr2/auto-orient/strip)
+
+
 #####1、PhotoKit是什么？
 
 PhotoKit是苹果给我们提供的一个处理相册资源的库。以前使用[AssetsLibrary 框架](https://developer.apple.com/library/ios/documentation/AssetsLibrary/Reference/ALAssetsLibrary_Class/#//apple_ref/doc/uid/TP40009722-CH1-SW57) ， 相机应用和照片应用发生了显著的变化，增加了许多新特性，包括按时刻来组织照片的方式。但与此同时，AssetsLibrary 框架落伍了，iOS 8 开始苹果引入PhotoKit 。
