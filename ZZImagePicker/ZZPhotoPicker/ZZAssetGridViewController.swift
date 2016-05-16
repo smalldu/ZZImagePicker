@@ -53,6 +53,8 @@ class ZZAssetGridViewController: UIViewController {
             assetsFetchResults = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Image,options: allPhotosOptions)
         }
         
+       
+        
         // 初始化和重置缓存
         self.imageManager = PHCachingImageManager()
         self.resetCachedAssets()
