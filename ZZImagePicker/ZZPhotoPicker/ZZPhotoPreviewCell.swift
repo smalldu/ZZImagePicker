@@ -48,6 +48,13 @@ class ZZPhotoPreviewCell: UICollectionViewCell {
         self.imageView.addGestureRecognizer(doubleTap)
         self.imageView.userInteractionEnabled = true
         
+        let tap = UITapGestureRecognizer(target: self, action: #selector(ZZPhotoPreviewCell.tap(_:)))
+        tap.numberOfTouchesRequired = 1
+        tap.numberOfTapsRequired = 1
+        self.imageView.addGestureRecognizer(tap)
+        
+        // 单击和双击共存
+        tap.requireGestureRecognizerToFail(doubleTap)
     }
     
     func calSize(){
@@ -62,7 +69,11 @@ class ZZPhotoPreviewCell: UICollectionViewCell {
         
     }
     
-    func doubleTapImg(){
+    func doubleTapImg(ges:UITapGestureRecognizer){
+        if let nav = self.responderViewController().navigationController{
+            UIApplication.sharedApplication().setStatusBarHidden(true, withAnimation: UIStatusBarAnimation.None)
+            nav.setNavigationBarHidden(true, animated: true)
+        }
         if scrollView.zoomScale == 1.0 {
             UIView.animateWithDuration(0.5, animations: {
                 self.scrollView.zoomScale = 3.0
@@ -72,6 +83,13 @@ class ZZPhotoPreviewCell: UICollectionViewCell {
             UIView.animateWithDuration(0.5, animations: {
                 self.scrollView.zoomScale = 1.0
             })
+        }
+    }
+    
+    func tap(ges:UITapGestureRecognizer){
+        if let nav = self.responderViewController().navigationController{
+            UIApplication.sharedApplication().setStatusBarHidden(!UIApplication.sharedApplication().statusBarHidden, withAnimation: UIStatusBarAnimation.None)
+            nav.setNavigationBarHidden(!nav.navigationBarHidden, animated: true)
         }
     }
     
