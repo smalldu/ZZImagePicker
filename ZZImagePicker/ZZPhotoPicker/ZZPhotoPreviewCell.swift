@@ -10,12 +10,12 @@ import UIKit
 
 extension CGSize{
     /** 按比例缩放 */
-    func ratioSize(ratio: CGFloat) -> CGSize{
-        return CGSizeMake(self.width / ratio, self.height / ratio)
+    func ratioSize(_ ratio: CGFloat) -> CGSize{
+        return CGSize(width: self.width / ratio, height: self.height / ratio)
     }
 }
 
-func decisionShowSize(imgSize: CGSize) ->CGSize{
+func decisionShowSize(_ imgSize: CGSize) ->CGSize{
     let heightRatio = imgSize.height / zz_sh
     let widthRatio = imgSize.width / zz_sw
     if heightRatio > 1 && widthRatio>1 {return imgSize.ratioSize(max(heightRatio, widthRatio))}
@@ -41,12 +41,12 @@ class ZZPhotoPreviewCell: UICollectionViewCell {
         scrollView.maximumZoomScale = 3.0
         scrollView.minimumZoomScale = 1.0
         
-        imageView.contentMode = .ScaleAspectFit
+        imageView.contentMode = .scaleAspectFit
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector(ZZPhotoPreviewCell.doubleTapImg))
         doubleTap.numberOfTouchesRequired = 1
         doubleTap.numberOfTapsRequired = 2
         self.imageView.addGestureRecognizer(doubleTap)
-        self.imageView.userInteractionEnabled = true
+        self.imageView.isUserInteractionEnabled = true
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(ZZPhotoPreviewCell.tap(_:)))
         tap.numberOfTouchesRequired = 1
@@ -54,7 +54,7 @@ class ZZPhotoPreviewCell: UICollectionViewCell {
         self.imageView.addGestureRecognizer(tap)
         
         // 单击和双击共存
-        tap.requireGestureRecognizerToFail(doubleTap)
+        tap.require(toFail: doubleTap)
     }
     
     func calSize(){
@@ -69,27 +69,27 @@ class ZZPhotoPreviewCell: UICollectionViewCell {
         
     }
     
-    func doubleTapImg(ges:UITapGestureRecognizer){
+    func doubleTapImg(_ ges:UITapGestureRecognizer){
         if let nav = self.responderViewController().navigationController{
-            UIApplication.sharedApplication().setStatusBarHidden(true, withAnimation: UIStatusBarAnimation.None)
+            UIApplication.shared.setStatusBarHidden(true, with: UIStatusBarAnimation.none)
             nav.setNavigationBarHidden(true, animated: true)
         }
         if scrollView.zoomScale == 1.0 {
-            UIView.animateWithDuration(0.5, animations: {
+            UIView.animate(withDuration: 0.5, animations: {
                 self.scrollView.zoomScale = 3.0
             })
             
         }else{
-            UIView.animateWithDuration(0.5, animations: {
+            UIView.animate(withDuration: 0.5, animations: {
                 self.scrollView.zoomScale = 1.0
             })
         }
     }
     
-    func tap(ges:UITapGestureRecognizer){
+    func tap(_ ges:UITapGestureRecognizer){
         if let nav = self.responderViewController().navigationController{
-            UIApplication.sharedApplication().setStatusBarHidden(!UIApplication.sharedApplication().statusBarHidden, withAnimation: UIStatusBarAnimation.None)
-            nav.setNavigationBarHidden(!nav.navigationBarHidden, animated: true)
+            UIApplication.shared.setStatusBarHidden(!UIApplication.shared.isStatusBarHidden, with: UIStatusBarAnimation.none)
+            nav.setNavigationBarHidden(!nav.isNavigationBarHidden, animated: true)
         }
     }
     
@@ -100,15 +100,15 @@ class ZZPhotoPreviewCell: UICollectionViewCell {
 
 extension ZZPhotoPreviewCell:UIScrollViewDelegate{
 
-    func viewForZoomingInScrollView(scrollView: UIScrollView) -> UIView? {
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return self.imageView
     }
     
-    func scrollViewDidZoom(scrollView: UIScrollView) {
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
         var xcenter = scrollView.center.x
         var ycenter = scrollView.center.y
         xcenter = scrollView.contentSize.width > scrollView.frame.size.width ? scrollView.contentSize.width/2:xcenter
         ycenter = scrollView.contentSize.height > scrollView.frame.size.height ? scrollView.contentSize.height/2:ycenter
-        imageView.center = CGPointMake(xcenter, ycenter)
+        imageView.center = CGPoint(x: xcenter, y: ycenter)
     }
 }

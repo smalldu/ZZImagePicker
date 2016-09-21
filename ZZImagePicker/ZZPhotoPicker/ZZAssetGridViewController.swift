@@ -9,8 +9,8 @@
 import UIKit
 import Photos
 
-let zz_sw:CGFloat = UIScreen.mainScreen().bounds.width
-let zz_sh:CGFloat = UIScreen.mainScreen().bounds.height
+let zz_sw:CGFloat = UIScreen.main.bounds.width
+let zz_sh:CGFloat = UIScreen.main.bounds.height
 
 class ZZAssetGridViewController: UIViewController {
     
@@ -21,7 +21,7 @@ class ZZAssetGridViewController: UIViewController {
     @IBOutlet weak var sendItem: UIBarButtonItem!
     
     /// 后去到的结果 存放的PHAsset
-    var assetsFetchResults:PHFetchResult!
+    var assetsFetchResults:PHFetchResult<PHAsset>!
     
     /// 带缓存的图片管理对象
     var imageManager:PHCachingImageManager!
@@ -36,7 +36,7 @@ class ZZAssetGridViewController: UIViewController {
     var maxSelected:Int = 9
     
     /// 点击完成时的回调
-    var completeHandler:((assets:[PHAsset])->())?
+    var completeHandler:((_ assets:[PHAsset])->())?
     
     lazy var selectedLayer:ZZImageSelectedLabel = {
         let tmpLayer = ZZImageSelectedLabel(toolBar:self.toolBar)
@@ -49,8 +49,9 @@ class ZZAssetGridViewController: UIViewController {
             // 如果没有传入值 则获取所有资源
             let allPhotosOptions = PHFetchOptions()
             allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-            allPhotosOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.Image.rawValue)
-            assetsFetchResults = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Image,options: allPhotosOptions)
+            allPhotosOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
+            assetsFetchResults = PHAsset.fetchAssets(with: PHAssetMediaType.image,options: allPhotosOptions)
+            
         }
         
        
@@ -59,19 +60,19 @@ class ZZAssetGridViewController: UIViewController {
         self.imageManager = PHCachingImageManager()
         self.resetCachedAssets()
         // 监听资源改变 （可以不要 如果不用删除和修改图片的话）
-        PHPhotoLibrary.sharedPhotoLibrary().registerChangeObserver(self)
+        PHPhotoLibrary.shared().register(self)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.collectionView.backgroundColor = UIColor.whiteColor()
+        self.collectionView.backgroundColor = UIColor.white
         
         // 获取流布局对象并设置itemSize 设置允许多选
         let layout = (self.collectionView.collectionViewLayout as! UICollectionViewFlowLayout)
-        layout.itemSize = CGSize(width: UIScreen.mainScreen().bounds.size.width/3-1,height: UIScreen.mainScreen().bounds.size.width/3-1)
+        layout.itemSize = CGSize(width: UIScreen.main.bounds.size.width/4-1,height: UIScreen.main.bounds.size.width/4-1)
         self.collectionView.allowsMultipleSelection = true
         
-        let rightBarItem = UIBarButtonItem(title: "取消", style: UIBarButtonItemStyle.Plain, target: self, action: #selector(ZZAssetGridViewController.cancel))
+        let rightBarItem = UIBarButtonItem(title: "取消", style: UIBarButtonItemStyle.plain, target: self, action: #selector(ZZAssetGridViewController.cancel))
         self.navigationItem.rightBarButtonItem = rightBarItem
         
         self.preview.action = #selector(ZZAssetGridViewController.previewImage)
@@ -80,34 +81,34 @@ class ZZAssetGridViewController: UIViewController {
         self.disableItems()
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         // 计算出小图大小 （ 为targetSize做准备 ）
-        let scale = UIScreen.mainScreen().scale
+        let scale = UIScreen.main.scale
         let cellSize = (self.collectionView.collectionViewLayout as! UICollectionViewFlowLayout).itemSize
-        assetGridThumbnailSize = CGSizeMake( cellSize.width*scale , cellSize.height*scale)
+        assetGridThumbnailSize = CGSize( width: cellSize.width*scale , height: cellSize.height*scale)
     }
     
     // 是否页面加载完毕 ， 加载完毕后再做缓存 否则数值可能有误
     var didLoad = false
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         didLoad = true
     }
     
-    private func enableItems(){
-        preview.enabled = true
-        sendItem.enabled = true
+    fileprivate func enableItems(){
+        preview.isEnabled = true
+        sendItem.isEnabled = true
     }
     
-    private func disableItems(){
-        preview.enabled = false
-        sendItem.enabled = false
+    fileprivate func disableItems(){
+        preview.isEnabled = false
+        sendItem.isEnabled = false
     }
     deinit{
-        PHPhotoLibrary.sharedPhotoLibrary().unregisterChangeObserver(self)
+        PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
     /**
@@ -115,14 +116,14 @@ class ZZAssetGridViewController: UIViewController {
      */
     func resetCachedAssets(){
         self.imageManager.stopCachingImagesForAllAssets()
-        self.previousPreheatRect = CGRectZero
+        self.previousPreheatRect = CGRect.zero
     }
     
     /**
      取消
      */
     func cancel() {
-        self.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+        self.navigationController?.dismiss(animated: true, completion: nil)
     }
     
     /**
@@ -131,7 +132,7 @@ class ZZAssetGridViewController: UIViewController {
      - returns: count
      */
     func selectedCount() -> Int {
-        return self.collectionView.indexPathsForSelectedItems()?.count ?? 0
+        return self.collectionView.indexPathsForSelectedItems?.count ?? 0
     }
 }
 
@@ -142,9 +143,9 @@ extension ZZAssetGridViewController{
     func previewImage() {
         // 预览
         var assets:[PHAsset] = []
-        if let indexPaths = self.collectionView.indexPathsForSelectedItems(){
+        if let indexPaths = self.collectionView.indexPathsForSelectedItems{
             for indexPath in indexPaths{
-                assets.append(assetsFetchResults[indexPath.row] as! PHAsset)
+                assets.append(assetsFetchResults[(indexPath as NSIndexPath).row] )
             }
         }
         
@@ -157,14 +158,14 @@ extension ZZAssetGridViewController{
      */
     func finishSelect(){
         var assets:[PHAsset] = []
-        if let indexPaths = self.collectionView.indexPathsForSelectedItems(){
+        if let indexPaths = self.collectionView.indexPathsForSelectedItems{
             for indexPath in indexPaths{
-                assets.append(assetsFetchResults[indexPath.row] as! PHAsset)
+                assets.append(assetsFetchResults[(indexPath as NSIndexPath).row] )
             }
         }
 
-        self.navigationController?.dismissViewControllerAnimated(true, completion: {
-            self.completeHandler?(assets:assets)
+        self.navigationController?.dismiss(animated: true, completion: {
+            self.completeHandler?(assets)
         })
     }
     
@@ -173,25 +174,30 @@ extension ZZAssetGridViewController{
 //MARK: - PHPhotoLibraryChangeObserver 图片删除或者修改开始后触发的代理 如果没有删除或者修改操作可以删掉这段和前面注册的代码
 extension ZZAssetGridViewController:PHPhotoLibraryChangeObserver{
     
-    func photoLibraryDidChange(changeInstance: PHChange) {
+    func photoLibraryDidChange(_ changeInstance: PHChange) {
         
-        guard let collectionChanges = changeInstance.changeDetailsForFetchResult(self.assetsFetchResults) else { return }
-        dispatch_async(dispatch_get_main_queue()) { 
-            self.assetsFetchResults = collectionChanges.fetchResultAfterChanges
+        guard let collectionChanges = changeInstance.changeDetails(for: self.assetsFetchResults as! PHFetchResult<PHObject>) else { return }
+        DispatchQueue.main.async { 
+            
+            if let allResult = collectionChanges.fetchResultAfterChanges as? PHFetchResult<PHAsset>{
+                self.assetsFetchResults = allResult
+            }
+//            self.assetsFetchResults = collectionChanges.fetchResultAfterChanges
+            
             let collectionView = self.collectionView
             if !collectionChanges.hasIncrementalChanges || collectionChanges.hasMoves{
-                collectionView.reloadData()
+                collectionView?.reloadData()
             }else{
-                collectionView.performBatchUpdates({
-                        if let removedIndexes = collectionChanges.removedIndexes where removedIndexes.count > 0{
-                            collectionView.deleteItemsAtIndexPaths(removedIndexes.zz_indexPathsFromIndexesWithSection(0))
+                collectionView?.performBatchUpdates({
+                        if let removedIndexes = collectionChanges.removedIndexes , removedIndexes.count > 0{
+                            collectionView?.deleteItems(at: removedIndexes.zz_indexPathsFromIndexesWithSection(0))
                         }
-                        if let insertedIndexes = collectionChanges.insertedIndexes where insertedIndexes.count > 0{
-                            collectionView.insertItemsAtIndexPaths(insertedIndexes.zz_indexPathsFromIndexesWithSection(0))
+                        if let insertedIndexes = collectionChanges.insertedIndexes , insertedIndexes.count > 0{
+                            collectionView?.insertItems(at: insertedIndexes.zz_indexPathsFromIndexesWithSection(0))
                         }
                         
-                        if let changedIndexes = collectionChanges.changedIndexes where changedIndexes.count > 0{
-                            collectionView.reloadItemsAtIndexPaths(changedIndexes.zz_indexPathsFromIndexesWithSection(0))
+                        if let changedIndexes = collectionChanges.changedIndexes , changedIndexes.count > 0{
+                            collectionView?.reloadItems(at: changedIndexes.zz_indexPathsFromIndexesWithSection(0))
                         }
                     
                     }, completion: nil)
@@ -206,23 +212,23 @@ extension ZZAssetGridViewController:PHPhotoLibraryChangeObserver{
 //MARK: - UICollectionViewDataSource,UICollectionViewDelegate
 extension ZZAssetGridViewController:UICollectionViewDataSource,UICollectionViewDelegate{
     
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.assetsFetchResults.count
     }
     
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("cell", forIndexPath: indexPath) as! ZZGridViewCell
-        let asset = self.assetsFetchResults[indexPath.row] as! PHAsset
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! ZZGridViewCell
+        let asset = self.assetsFetchResults[(indexPath as NSIndexPath).row]
         
-        self.imageManager.requestImageForAsset(asset, targetSize: assetGridThumbnailSize, contentMode: PHImageContentMode.AspectFill, options: nil) { (image, nfo) in
+        self.imageManager.requestImage(for: asset, targetSize: assetGridThumbnailSize, contentMode: PHImageContentMode.aspectFill, options: nil) { (image, nfo) in
             cell.imageView.image = image
         }
         
         return cell
     }
     
-    func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
-        if let cell = collectionView.cellForItemAtIndexPath(indexPath) as? ZZGridViewCell{
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        if let cell = collectionView.cellForItem(at: indexPath) as? ZZGridViewCell{
             let sc = self.selectedCount()
             selectedLayer.num = sc
             if sc == 0{
@@ -232,16 +238,16 @@ extension ZZAssetGridViewController:UICollectionViewDataSource,UICollectionViewD
         }
     }
     
-    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        if let cell = collectionView.cellForItemAtIndexPath(indexPath) as? ZZGridViewCell{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if let cell = collectionView.cellForItem(at: indexPath) as? ZZGridViewCell{
             let sc = self.selectedCount()
             if sc > self.maxSelected {
                 // 如果选择的个数大于最大选择数 设置为不选中状态
-                collectionView.deselectItemAtIndexPath(indexPath, animated: false)
+                collectionView.deselectItem(at: indexPath, animated: false)
                 selectedLayer.tooMoreAnimate()
             }else{
                 selectedLayer.num = sc
-                if sc > 0 && !self.sendItem.enabled{
+                if sc > 0 && !self.sendItem.isEnabled{
                     self.enableItems()
                 }
                 cell.showAnim()
@@ -252,7 +258,7 @@ extension ZZAssetGridViewController:UICollectionViewDataSource,UICollectionViewD
     /**
      在滚动中不断更新缓存
      */
-    func scrollViewDidScroll(scrollView: UIScrollView) {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
         self.updateCachedAssets()
     }
     
@@ -261,7 +267,7 @@ extension ZZAssetGridViewController:UICollectionViewDataSource,UICollectionViewD
      */
     func updateCachedAssets()  {
         
-        let isViewVisible = self.isViewLoaded() && didLoad
+        let isViewVisible = self.isViewLoaded && didLoad
         
         if !isViewVisible{
             // 没有加载完成前 取的数据有误
@@ -269,13 +275,13 @@ extension ZZAssetGridViewController:UICollectionViewDataSource,UICollectionViewD
         }
         
         var preheatRect = self.collectionView.bounds
-        preheatRect = CGRectInset(preheatRect, 0, -0.5*CGRectGetHeight(preheatRect))
+        preheatRect = preheatRect.insetBy(dx: 0, dy: -0.5*preheatRect.height)
         
-        let delta = abs(CGRectGetMidY(preheatRect) - CGRectGetMidY(self.previousPreheatRect))
-        if delta > CGRectGetHeight(self.collectionView.bounds) / 3.0{
+        let delta = abs(preheatRect.midY - self.previousPreheatRect.midY)
+        if delta > self.collectionView.bounds.height / 3.0{
             
-            var addedIndexPaths = [NSIndexPath]()
-            var removedIndexPaths = [NSIndexPath]()
+            var addedIndexPaths = [IndexPath]()
+            var removedIndexPaths = [IndexPath]()
             self.computeDifferenceBetweenRect(self.previousPreheatRect, andRect: preheatRect, removedHandler: { (removedRect) in
                     let indexPaths = self.collectionView.zz_indexPathsForElementsInRect(removedRect)
                     removedIndexPaths = removedIndexPaths.filter({ (indexPath) -> Bool in
@@ -291,52 +297,52 @@ extension ZZAssetGridViewController:UICollectionViewDataSource,UICollectionViewD
             let assetsToStartCaching = self.assetsAtIndexPaths(addedIndexPaths)
             let assetsToStopCaching = self.assetsAtIndexPaths(removedIndexPaths)
             
-            self.imageManager.startCachingImagesForAssets(assetsToStartCaching, targetSize: assetGridThumbnailSize, contentMode: PHImageContentMode.AspectFill, options: nil)
-            self.imageManager.stopCachingImagesForAssets(assetsToStopCaching, targetSize: assetGridThumbnailSize, contentMode: PHImageContentMode.AspectFill, options: nil)
+            self.imageManager.startCachingImages(for: assetsToStartCaching, targetSize: assetGridThumbnailSize, contentMode: PHImageContentMode.aspectFill, options: nil)
+            self.imageManager.stopCachingImages(for: assetsToStopCaching, targetSize: assetGridThumbnailSize, contentMode: PHImageContentMode.aspectFill, options: nil)
             
             self.previousPreheatRect = preheatRect
         }
     }
     
-    func computeDifferenceBetweenRect(oldRect:CGRect, andRect newRect:CGRect,removedHandler:((removedRect:CGRect)->())?,addedHandler:((addedRect:CGRect)->())?) {
+    func computeDifferenceBetweenRect(_ oldRect:CGRect, andRect newRect:CGRect,removedHandler:((_ removedRect:CGRect)->())?,addedHandler:((_ addedRect:CGRect)->())?) {
         
-        if CGRectIntersectsRect(newRect, oldRect){ //判断两个矩形是否相交
+        if newRect.intersects(oldRect){ //判断两个矩形是否相交
             
-            let oldMaxY = CGRectGetMaxY(oldRect)
-            let oldMinY = CGRectGetMinY(oldRect)
-            let newMaxY = CGRectGetMaxY(newRect)
-            let newMinY = CGRectGetMinY(newRect)
+            let oldMaxY = oldRect.maxY
+            let oldMinY = oldRect.minY
+            let newMaxY = newRect.maxY
+            let newMinY = newRect.minY
             if newMaxY>oldMaxY{
-                let rectToAdd = CGRectMake(newRect.origin.x, oldMaxY , newRect.size.width, newMaxY-oldMaxY)
-                addedHandler?(addedRect: rectToAdd)
+                let rectToAdd = CGRect(x: newRect.origin.x, y: oldMaxY , width: newRect.size.width, height: newMaxY-oldMaxY)
+                addedHandler?(rectToAdd)
             }
             
             if oldMinY > newMinY {
-                let rectToAdd = CGRectMake(newRect.origin.x, newMinY, newRect.size.width, (oldMinY - newMinY))
-                addedHandler?(addedRect:rectToAdd)
+                let rectToAdd = CGRect(x: newRect.origin.x, y: newMinY, width: newRect.size.width, height: (oldMinY - newMinY))
+                addedHandler?(rectToAdd)
             }
             
             if newMaxY < oldMaxY {
-                let rectToRemove = CGRectMake(newRect.origin.x, newMaxY, newRect.size.width, (oldMaxY - newMaxY))
-                removedHandler?(removedRect:rectToRemove);
+                let rectToRemove = CGRect(x: newRect.origin.x, y: newMaxY, width: newRect.size.width, height: (oldMaxY - newMaxY))
+                removedHandler?(rectToRemove);
             }
             
             if oldMinY < newMinY {
-                let rectToRemove = CGRectMake(newRect.origin.x, oldMinY, newRect.size.width, (newMinY - oldMinY))
-                removedHandler?(removedRect:rectToRemove)
+                let rectToRemove = CGRect(x: newRect.origin.x, y: oldMinY, width: newRect.size.width, height: (newMinY - oldMinY))
+                removedHandler?(rectToRemove)
             }
             
         }else{
-            addedHandler?(addedRect: newRect);
-            removedHandler?(removedRect:oldRect);
+            addedHandler?(newRect);
+            removedHandler?(oldRect);
         }
     }
     
-    func assetsAtIndexPaths(indexPaths:[NSIndexPath]) -> [PHAsset] {
+    func assetsAtIndexPaths(_ indexPaths:[IndexPath]) -> [PHAsset] {
         var assets = [PHAsset]()
         for indexPath in indexPaths{
-            let asset = self.assetsFetchResults[indexPath.row]
-            assets.append(asset as! PHAsset)
+            let asset = self.assetsFetchResults[(indexPath as NSIndexPath).row]
+            assets.append(asset)
         }
         return assets
     }

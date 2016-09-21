@@ -40,5 +40,9 @@
 	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+    <key>NSCameraUsageDescription</key>
+    <string>我们需要使用您的相机提供更好的服务</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>我们需要您的同意才能读取媒体资料库</string>
 </dict>
 </plist>

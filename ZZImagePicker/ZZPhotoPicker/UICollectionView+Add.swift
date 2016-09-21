@@ -11,10 +11,10 @@ import Photos
 
 extension UICollectionView{
     
-    func zz_indexPathsForElementsInRect(rect:CGRect) -> [NSIndexPath] {
-        let allLayoutAttributes = self.collectionViewLayout.layoutAttributesForElementsInRect(rect)
-        if let allLayoutAttributes = allLayoutAttributes where  allLayoutAttributes.count == 0 {
-            var indexPaths = [NSIndexPath]()
+    func zz_indexPathsForElementsInRect(_ rect:CGRect) -> [IndexPath] {
+        let allLayoutAttributes = self.collectionViewLayout.layoutAttributesForElements(in: rect)
+        if let allLayoutAttributes = allLayoutAttributes ,  allLayoutAttributes.count == 0 {
+            var indexPaths = [IndexPath]()
             for attr in allLayoutAttributes{
                 let indexPath = attr.indexPath
                 indexPaths.append(indexPath)
@@ -28,14 +28,14 @@ extension UICollectionView{
     
 }
 
-extension NSIndexSet{
+extension IndexSet{
     
-    func zz_indexPathsFromIndexesWithSection(section:Int)->[NSIndexPath]{
+    func zz_indexPathsFromIndexesWithSection(_ section:Int)->[IndexPath]{
         
-        var indexPaths = [NSIndexPath]()
+        var indexPaths = [IndexPath]()
         
-        self.enumerateIndexesUsingBlock { (idx, b) in
-            indexPaths.append(NSIndexPath(forItem: idx, inSection: section))
+        self.forEach { (idx) in
+            indexPaths.append(IndexPath(item: idx, section: section))
         }
         return indexPaths
         
@@ -45,48 +45,48 @@ extension NSIndexSet{
 
 extension UIViewController{
 
-    private func authorize(status: PHAuthorizationStatus = PHPhotoLibrary.authorizationStatus())->Bool{
+    fileprivate func authorize(_ status: PHAuthorizationStatus = PHPhotoLibrary.authorizationStatus())->Bool{
         switch status {
-        case .Authorized:
+        case .authorized:
             return true
-        case .NotDetermined:
+        case .notDetermined:
             // 请求授权
             PHPhotoLibrary.requestAuthorization({ (status) -> Void in
-                dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                    self.authorize(status)
+                DispatchQueue.main.async(execute: { () -> Void in
+                    _ = self.authorize(status)
                 })
             })
         default: ()
-        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+        DispatchQueue.main.async(execute: { () -> Void in
             let alertController = UIAlertController(title: "访问相册受限",
                 message: "点击“设置”，允许访问您的相册",
-                preferredStyle: .Alert)
+                preferredStyle: .alert)
             
-            let cancelAction = UIAlertAction(title:  "取消", style: .Cancel, handler:nil)
+            let cancelAction = UIAlertAction(title:  "取消", style: .cancel, handler:nil)
             
-            let settingsAction = UIAlertAction(title: "设置", style: .Default, handler: { (action) -> Void in
-                let url = NSURL(string: UIApplicationOpenSettingsURLString)
-                if let url = url where UIApplication.sharedApplication().canOpenURL(url) {
-                    UIApplication.sharedApplication().openURL(url)
+            let settingsAction = UIAlertAction(title: "设置", style: .default, handler: { (action) -> Void in
+                let url = URL(string: UIApplicationOpenSettingsURLString)
+                if let url = url , UIApplication.shared.canOpenURL(url) {
+                    UIApplication.shared.openURL(url)
                 }
             })
             
             alertController.addAction(cancelAction)
             alertController.addAction(settingsAction)
             
-            self.presentViewController(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         })
         }
         return false
     }
     
-    func zz_presentPhotoVC(maxSelected:Int,completeHandler:((assets:[PHAsset])->())?) -> ZZPhotoViewController?{
+    func zz_presentPhotoVC(_ maxSelected:Int,completeHandler:((_ assets:[PHAsset])->())?) -> ZZPhotoViewController?{
         guard authorize() else { return nil }
-        if let vc = UIStoryboard(name: "ZZImage", bundle: NSBundle.mainBundle()).instantiateViewControllerWithIdentifier("photoVC") as? ZZPhotoViewController{
+        if let vc = UIStoryboard(name: "ZZImage", bundle: Bundle.main).instantiateViewController(withIdentifier: "photoVC") as? ZZPhotoViewController{
             vc.completeHandler = completeHandler
             vc.maxSelected = maxSelected
             let nav = UINavigationController(rootViewController: vc)
-            self.presentViewController(nav, animated: true, completion: nil)
+            self.present(nav, animated: true, completion: nil)
             return vc
         }
         return nil
@@ -116,11 +116,11 @@ extension UIView{
     }
     
     func zz_snapShotImage()->UIImage{
-        UIGraphicsBeginImageContextWithOptions(self.bounds.size, self.opaque, 0)
-        self.layer.renderInContext(UIGraphicsGetCurrentContext()!)
+        UIGraphicsBeginImageContextWithOptions(self.bounds.size, self.isOpaque, 0)
+        self.layer.render(in: UIGraphicsGetCurrentContext()!)
         let snap = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
-        return snap;
+        return snap!;
     }
     
     var zz_size:CGSize{
@@ -181,14 +181,18 @@ extension UIView{
     //查找vc
     func responderViewController() -> UIViewController {
         var responder: UIResponder! = nil
-        for var next = self.superview; (next != nil); next = next!.superview {
-            responder = next?.nextResponder()
-            if (responder!.isKindOfClass(UIViewController)){
+        var next = self.superview
+        while next != nil {
+            responder = next?.next
+            if responder.isKind(of: UIViewController.self) {
                 return (responder as! UIViewController)
             }
+            next = next?.superview
         }
+        
         return (responder as! UIViewController)
     }
+    
     
     func zz_removeAllSubviews(){
         for item in self.subviews{

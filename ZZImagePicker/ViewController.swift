@@ -20,9 +20,11 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
     }
     
-    @IBAction func goPhoto(sender: AnyObject) {
+    @IBAction func goPhoto(_ sender: AnyObject) {
         
-        self.zz_presentPhotoVC(6) { (assets) in
+        _ = self.zz_presentPhotoVC(6) { (assets) in
+            
+            
             
         }
         

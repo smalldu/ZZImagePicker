@@ -8,13 +8,13 @@
 
 import UIKit
 
-public class ZZGridViewCell: UICollectionViewCell {
+open class ZZGridViewCell: UICollectionViewCell {
 
     @IBOutlet weak var imageView:UIImageView!
     @IBOutlet weak var selectedImageView:UIImageView!
-    public override var selected: Bool {
+    open override var isSelected: Bool {
         didSet{
-            if selected {
+            if isSelected {
                 selectedImageView.image = UIImage(named: "zz_image_cell_selected")
                 
                 
@@ -25,20 +25,20 @@ public class ZZGridViewCell: UICollectionViewCell {
     }
     
     func showAnim() {
-        UIView.animateKeyframesWithDuration(0.4, delay: 0, options: UIViewKeyframeAnimationOptions.AllowUserInteraction, animations: {
+        UIView.animateKeyframes(withDuration: 0.4, delay: 0, options: UIViewKeyframeAnimationOptions.allowUserInteraction, animations: {
             
-            UIView.addKeyframeWithRelativeStartTime(0, relativeDuration: 0.2, animations: {
-                self.selectedImageView.transform = CGAffineTransformMakeScale(0.7, 0.7)
+            UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 0.2, animations: {
+                self.selectedImageView.transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
             })
-            UIView.addKeyframeWithRelativeStartTime(0.2, relativeDuration: 0.4, animations: {
-                self.selectedImageView.transform = CGAffineTransformIdentity
+            UIView.addKeyframe(withRelativeStartTime: 0.2, relativeDuration: 0.4, animations: {
+                self.selectedImageView.transform = CGAffineTransform.identity
             })
             }, completion: nil)
     }
     
-    public override func awakeFromNib() {
+    open override func awakeFromNib() {
         super.awakeFromNib()
-        imageView.contentMode = .ScaleAspectFill
+        imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
     }
 
